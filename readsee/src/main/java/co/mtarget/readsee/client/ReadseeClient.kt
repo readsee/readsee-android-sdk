@@ -48,6 +48,7 @@ class ReadseeClient {
             this.endpointInterface = endpointInterface
             this.apiKey = apiKey
             if (FirebaseApp.getApps(context).isEmpty()) setUpFirebase(context)
+            profile(JSONObject())
         }
 
         private fun setUpFirebase(context: Context) {
