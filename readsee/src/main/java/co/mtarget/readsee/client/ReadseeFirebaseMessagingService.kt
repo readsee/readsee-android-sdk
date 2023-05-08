@@ -17,17 +17,21 @@ import com.google.firebase.messaging.RemoteMessage
 
 public open class ReadseeFirebaseMessagingService : FirebaseMessagingService() {
 
+    val smallIcon = R.drawable.ic_stat_ic_notification
+    val contentTitle = "Readsee Message"
+
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         if (remoteMessage.data.isNotEmpty()) {
             println("PAYLOAD Message data payload: ${remoteMessage.data}")
         }
         remoteMessage.notification?.let {
             println("BODY Message Notification Body: ${it.body}")
-            it.body?.let { body -> sendNotification(body) }
+            val title = it.title ?: contentTitle
+            it.body?.let { body -> sendNotification(body, title) }
         }
     }
 
-    private fun sendNotification(messageBody: String) {
+    private fun sendNotification(messageBody: String, title: String) {
         val requestCode = 0
         val intent = Intent(this, PushTracker::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
@@ -41,8 +45,8 @@ public open class ReadseeFirebaseMessagingService : FirebaseMessagingService() {
         val channelId = "readsee_fcm_default_channel"
         val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
         val notificationBuilder = NotificationCompat.Builder(this, channelId)
-            .setContentTitle("Readsee Message")
-            .setSmallIcon(R.drawable.ic_stat_ic_notification)
+            .setContentTitle(title)
+            .setSmallIcon(smallIcon)
             .setContentText(messageBody)
             .setAutoCancel(true)
             .setSound(defaultSoundUri)
