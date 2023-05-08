@@ -1,14 +1,14 @@
 package co.mtarget.readsee
 
-import co.mtarget.readsee.dto.SdkDto
 import org.json.JSONObject
-
 
 interface ReadseeAPIInterface {
 
-    fun ping(): String
+    fun ping()
 
-    fun event(form: JSONObject): SdkDto
+    fun event(eventData: JSONObject)
 
-    fun profile(form: JSONObject): SdkDto
+    fun initProfile()
+
+    fun profile(profileData: JSONObject)
 }

@@ -1,16 +1,12 @@
 package co.mtarget.readsee.dto
 
+import com.google.gson.annotations.SerializedName
 import java.util.*
 
 data class SdkDto(
+    @SerializedName("_\$anonymous_id")
     val anonymousId: String? = null,
-    val distinctId: String? = null,
-)
 
-data class SdkToken(
-    val id: String = "",
-    val name: String = "",
-    val companyId: String = "",
-    val createdAt: Long = Date().time,
-    val expiredAt: Long = -1,
+    @SerializedName("_\$distinct_id")
+    val distinctId: String? = null,
 )

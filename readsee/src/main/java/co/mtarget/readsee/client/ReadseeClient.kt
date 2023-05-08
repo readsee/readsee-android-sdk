@@ -1,6 +1,8 @@
 package co.mtarget.readsee.client
 
 import android.content.Context
+import android.content.SharedPreferences
+import android.util.Log
 import co.mtarget.readsee.ReadseeAPIInterface
 import co.mtarget.readsee.ReadseeEndpointInterface
 import co.mtarget.readsee.dto.SdkDto
@@ -9,10 +11,12 @@ import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.FirebaseApp
 import com.google.firebase.FirebaseOptions
 import com.google.firebase.messaging.FirebaseMessaging
+import com.google.gson.Gson
+import com.google.gson.JsonObject
 import org.json.JSONObject
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.create
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class ReadseeClient {
 
@@ -23,32 +27,25 @@ class ReadseeClient {
     }
 
     class ReadseeClientBuilder(private val context: Context, private val apikey: String) {
-
-        private val retrofitBuilder: Retrofit.Builder
-            get() = Retrofit.Builder()
-                .addConverterFactory(GsonConverterFactory.create())
-
         fun createApi() : ReadseeAPIInterface {
-            val baseUrl: String = Constants.BASE_URL
-            val retrofit = retrofitBuilder.baseUrl(baseUrl).build()
-            val endpointInterface = retrofit.create<ReadseeEndpointInterface>()
-            return ReadSeeApi(context, endpointInterface, this.apikey)
+            return ReadSeeApi(context, ReadseeRequest.instance, this.apikey)
         }
-
     }
 
     class ReadSeeApi(context: Context, endpointInterface: ReadseeEndpointInterface, apiKey: String) : ReadseeAPIInterface {
-        val endpointInterface : ReadseeEndpointInterface
-        val apiKey: String
-        var firebaseToken: String? = null
-        var anonymous_id: String? = null
-        var distinct_id : String? = null
+        private val sharedPref: SharedPreferences
+        private val endpointInterface : ReadseeEndpointInterface
+        private val apiKey: String
+        private var firebaseToken: String? = null
+        private var anonymousId: String? = null
+        private var distinctId : String? = null
 
         init {
+            this.sharedPref = context.getSharedPreferences(Constants.SHARED_PREFERENCES, Context.MODE_PRIVATE)
             this.endpointInterface = endpointInterface
             this.apiKey = apiKey
             if (FirebaseApp.getApps(context).isEmpty()) setUpFirebase(context)
-            profile(JSONObject())
+            initProfile()
         }
 
         private fun setUpFirebase(context: Context) {
@@ -71,26 +68,121 @@ class ReadseeClient {
             })
         }
 
-        override fun ping(): String {
-            return endpointInterface.ping(this.apiKey).execute().body() ?: ""
+        override fun ping() {
+            endpointInterface.ping()
+                .enqueue(object: Callback<String>{
+                    override fun onResponse(call: Call<String>, response: Response<String>) {
+                        if (response.isSuccessful) {
+                            Log.d("ReadseeClient", "ping Request Success: ${response.body()}")
+                        } else {
+                            Log.d("ReadseeClient", "ping Request Error: ${response.errorBody()}")
+                        }
+                    }
+
+                    override fun onFailure(call: Call<String>, t: Throwable) {
+                        Log.d("ReadseeClient", "ping Network Error: ${t.localizedMessage}")
+                    }
+                })
         }
 
-        override fun event(form: JSONObject): SdkDto {
-            val res = endpointInterface.event(this.apiKey, form).execute().body() ?: JSONObject()
-            val sdkRes = SdkDto(res.getString("_\$anonymousId"), res.getString("_\$distinctId"))
-            return sdkRes
+        override fun event(eventData: JSONObject) {
+            val form = Gson().fromJson(eventData.toString(), JsonObject::class.java)
+
+            anonymousId = sharedPref.getString("anonymous_id", "")
+            distinctId = sharedPref.getString("distinct_id", "")
+
+            form.addProperty("_\$anonymous_id", anonymousId ?: "")
+            form.addProperty("_\$distinct_id", distinctId ?: "")
+
+            endpointInterface.event("Bearer $apiKey", form)
+                .enqueue(object: Callback<SdkDto>{
+                    override fun onResponse(call: Call<SdkDto>, response: Response<SdkDto>) {
+                        if (response.isSuccessful) {
+                            response.body()?.let {
+                                sharedPref.edit().apply {
+                                    putString("anonymous_id", it.anonymousId)
+                                    putString("distinct_id", it.distinctId)
+                                    apply()
+                                }
+                            }
+                        } else {
+                            Log.d("ReadseeClient", "event Request Error: ${response.errorBody()}")
+                        }
+                    }
+
+                    override fun onFailure(call: Call<SdkDto>, t: Throwable) {
+                        Log.d("ReadseeClient", "event Network Error: ${t.localizedMessage}")
+                    }
+                })
         }
 
-        override fun profile(form: JSONObject): SdkDto {
-            val default = form
-            if (form.getString("_\$distinctId").isNullOrEmpty()) default.put("_\$distinctId", this.distinct_id ?: "")
-            default.put("_\$anonymousId", this.anonymous_id ?: "")
-            default.put("_\$deviceId", this.firebaseToken ?: "")
-            val res = endpointInterface.profile(this.apiKey, form).execute().body() ?: JSONObject()
-            val sdkRes = SdkDto(res.getString("_\$anonymousId"), res.getString("_\$distinctId"))
-            this.distinct_id = sdkRes.distinctId
-            this.anonymous_id = sdkRes.anonymousId
-            return sdkRes
+        override fun initProfile() {
+            anonymousId = sharedPref.getString("anonymous_id", "")
+            distinctId = sharedPref.getString("distinct_id", "")
+
+            if (anonymousId.isNullOrEmpty() || distinctId.isNullOrEmpty()) {
+                val profileData = JsonObject()
+                profileData.addProperty("_\$anonymous_id", anonymousId ?: "")
+                profileData.addProperty("_\$distinct_id", distinctId ?: "")
+
+                if (!firebaseToken.isNullOrEmpty())
+                    profileData.addProperty("_\$deviceId", firebaseToken ?: "")
+
+                endpointInterface.profile("Bearer $apiKey", profileData)
+                    .enqueue(object: Callback<SdkDto>{
+                        override fun onResponse(call: Call<SdkDto>, response: Response<SdkDto>) {
+                            if (response.isSuccessful) {
+                                response.body()?.let {
+                                    sharedPref.edit().apply {
+                                        putString("anonymous_id", it.anonymousId)
+                                        putString("distinct_id", it.distinctId)
+                                        apply()
+                                    }
+                                }
+                            } else {
+                                Log.d("ReadseeClient", "initProfile Request Error: ${response.errorBody()}")
+                            }
+                        }
+
+                        override fun onFailure(call: Call<SdkDto>, t: Throwable) {
+                            Log.d("ReadseeClient", "initProfile Network Error: ${t.localizedMessage}")
+                        }
+                    })
+            }
+        }
+
+        override fun profile(profileData: JSONObject) {
+            val form = Gson().fromJson(profileData.toString(), JsonObject::class.java)
+
+            anonymousId = sharedPref.getString("anonymous_id", "")
+            distinctId = sharedPref.getString("distinct_id", "")
+
+            form.addProperty("_\$anonymous_id", anonymousId ?: "")
+            if (!firebaseToken.isNullOrEmpty())
+                form.addProperty("_\$deviceId", firebaseToken ?: "")
+            if (form.get("_\$distinct_id").asString.isNullOrEmpty())
+                form.addProperty("_\$distinct_id", distinctId ?: "")
+
+            endpointInterface.profile("Bearer $apiKey", form)
+                .enqueue(object: Callback<SdkDto>{
+                    override fun onResponse(call: Call<SdkDto>, response: Response<SdkDto>) {
+                        if (response.isSuccessful) {
+                            response.body()?.let {
+                                sharedPref.edit().apply {
+                                    putString("anonymous_id", it.anonymousId)
+                                    putString("distinct_id", it.distinctId)
+                                    apply()
+                                }
+                            }
+                        } else {
+                            Log.d("ReadseeClient", "profile Request Error: ${response.errorBody()}")
+                        }
+                    }
+
+                    override fun onFailure(call: Call<SdkDto>, t: Throwable) {
+                        Log.d("ReadseeClient", "profile Network Error: ${t.localizedMessage}")
+                    }
+                })
         }
     }
 }
