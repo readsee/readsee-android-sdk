@@ -160,7 +160,7 @@ class ReadseeClient {
             form.addProperty("_\$anonymous_id", anonymousId ?: "")
             if (!firebaseToken.isNullOrEmpty())
                 form.addProperty("_\$deviceId", firebaseToken ?: "")
-            if (form.get("_\$distinct_id").asString.isNullOrEmpty())
+            if (form.get("_\$distinct_id")?.asString.isNullOrEmpty())
                 form.addProperty("_\$distinct_id", distinctId ?: "")
 
             endpointInterface.profile("Bearer $apiKey", form)
