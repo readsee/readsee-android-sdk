@@ -41,8 +41,6 @@ class MainActivity : AppCompatActivity() {
         tracker = ReadseeClient.config(this,"64587b1cb345e900072e688b")
             .createApi()
 
-        tracker.initProfile()
-
         askNotificationPermission()
 
         binding.btnTrackEvent.setOnClickListener {

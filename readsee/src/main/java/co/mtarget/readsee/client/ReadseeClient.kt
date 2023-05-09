@@ -86,14 +86,19 @@ class ReadseeClient {
         }
 
         override fun event(eventData: JSONObject) {
-            val form = Gson().fromJson(eventData.toString(), JsonObject::class.java)
-
             anonymousId = sharedPref.getString("anonymous_id", "")
             distinctId = sharedPref.getString("distinct_id", "")
 
-            form.addProperty("_\$anonymous_id", anonymousId ?: "")
-            form.addProperty("_\$distinct_id", distinctId ?: "")
+            if (anonymousId?.isNotEmpty() == true && distinctId?.isNotEmpty() == true) {
+                val form = Gson().fromJson(eventData.toString(), JsonObject::class.java)
+                form.addProperty("_\$anonymous_id", anonymousId)
+                form.addProperty("_\$distinct_id", distinctId)
 
+                sendEvent(form)
+            }
+        }
+
+        private fun sendEvent(form: JsonObject) {
             endpointInterface.event("Bearer $apiKey", form)
                 .enqueue(object: Callback<SdkDto>{
                     override fun onResponse(call: Call<SdkDto>, response: Response<SdkDto>) {
@@ -116,7 +121,7 @@ class ReadseeClient {
                 })
         }
 
-        override fun initProfile() {
+        private fun initProfile() {
             anonymousId = sharedPref.getString("anonymous_id", "")
             distinctId = sharedPref.getString("distinct_id", "")
 
@@ -128,41 +133,29 @@ class ReadseeClient {
                 if (!firebaseToken.isNullOrEmpty())
                     profileData.addProperty("_\$deviceId", firebaseToken ?: "")
 
-                endpointInterface.profile("Bearer $apiKey", profileData)
-                    .enqueue(object: Callback<SdkDto>{
-                        override fun onResponse(call: Call<SdkDto>, response: Response<SdkDto>) {
-                            if (response.isSuccessful) {
-                                response.body()?.let {
-                                    sharedPref.edit().apply {
-                                        putString("anonymous_id", it.anonymousId)
-                                        putString("distinct_id", it.distinctId)
-                                        apply()
-                                    }
-                                }
-                            } else {
-                                Log.d("ReadseeClient", "initProfile Request Error: ${response.errorBody()}")
-                            }
-                        }
-
-                        override fun onFailure(call: Call<SdkDto>, t: Throwable) {
-                            Log.d("ReadseeClient", "initProfile Network Error: ${t.localizedMessage}")
-                        }
-                    })
+                sendUpdateProfile(profileData)
             }
         }
 
         override fun profile(profileData: JSONObject) {
-            val form = Gson().fromJson(profileData.toString(), JsonObject::class.java)
-
             anonymousId = sharedPref.getString("anonymous_id", "")
             distinctId = sharedPref.getString("distinct_id", "")
 
-            form.addProperty("_\$anonymous_id", anonymousId ?: "")
-            if (!firebaseToken.isNullOrEmpty())
-                form.addProperty("_\$deviceId", firebaseToken ?: "")
-            if (form.get("_\$distinct_id")?.asString.isNullOrEmpty())
-                form.addProperty("_\$distinct_id", distinctId ?: "")
+            if (anonymousId?.isNotEmpty() == true && distinctId?.isNotEmpty() == true) {
+                val form = Gson().fromJson(profileData.toString(), JsonObject::class.java)
+                form.addProperty("_\$anonymous_id", anonymousId)
 
+                if (firebaseToken?.isNotEmpty() == true)
+                    form.addProperty("_\$device_id", firebaseToken)
+
+                if (form.get("_\$distinct_id")?.asString.isNullOrEmpty())
+                    form.addProperty("_\$distinct_id", distinctId)
+
+                sendUpdateProfile(form)
+            }
+        }
+
+        private fun sendUpdateProfile(form: JsonObject) {
             endpointInterface.profile("Bearer $apiKey", form)
                 .enqueue(object: Callback<SdkDto>{
                     override fun onResponse(call: Call<SdkDto>, response: Response<SdkDto>) {

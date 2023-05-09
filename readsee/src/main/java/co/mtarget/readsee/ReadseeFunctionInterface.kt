@@ -8,7 +8,5 @@ interface ReadseeAPIInterface {
 
     fun event(eventData: JSONObject)
 
-    fun initProfile()
-
     fun profile(profileData: JSONObject)
 }
