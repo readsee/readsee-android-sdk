@@ -131,7 +131,7 @@ class ReadseeClient {
                 profileData.addProperty("_\$distinct_id", distinctId ?: "")
 
                 if (!firebaseToken.isNullOrEmpty())
-                    profileData.addProperty("_\$deviceId", firebaseToken ?: "")
+                    profileData.addProperty("_\$device_id", firebaseToken ?: "")
 
                 sendUpdateProfile(profileData)
             }
