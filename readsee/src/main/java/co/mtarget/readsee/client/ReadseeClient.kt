@@ -1,12 +1,13 @@
 package co.mtarget.readsee.client
 
 import android.content.Context
-import android.content.SharedPreferences
 import android.util.Log
 import co.mtarget.readsee.ReadseeAPIInterface
 import co.mtarget.readsee.ReadseeEndpointInterface
 import co.mtarget.readsee.dto.SdkDto
 import co.mtarget.readsee.util.Constants
+import co.mtarget.readsee.util.KeyStoreHelper
+import co.mtarget.readsee.util.TrackerHelper
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.FirebaseApp
 import com.google.firebase.FirebaseOptions
@@ -22,6 +23,7 @@ class ReadseeClient {
 
     companion object {
         fun config(context: Context, apiKey: String): ReadseeClientBuilder {
+            KeyStoreHelper.saveApiKey(context, apiKey)
             return ReadseeClientBuilder(context, apiKey)
         }
     }
@@ -33,15 +35,15 @@ class ReadseeClient {
     }
 
     class ReadSeeApi(context: Context, endpointInterface: ReadseeEndpointInterface, apiKey: String) : ReadseeAPIInterface {
-        private val sharedPref: SharedPreferences
         private val endpointInterface : ReadseeEndpointInterface
         private val apiKey: String
         private var firebaseToken: String? = null
         private var anonymousId: String? = null
         private var distinctId : String? = null
+        private var context: Context
 
         init {
-            this.sharedPref = context.getSharedPreferences(Constants.SHARED_PREFERENCES, Context.MODE_PRIVATE)
+            this.context = context
             this.endpointInterface = endpointInterface
             this.apiKey = apiKey
             if (FirebaseApp.getApps(context).isEmpty()) setUpFirebase(context)
@@ -86,8 +88,9 @@ class ReadseeClient {
         }
 
         override fun event(eventData: JSONObject) {
-            anonymousId = sharedPref.getString("anonymous_id", "")
-            distinctId = sharedPref.getString("distinct_id", "")
+            val sdkDto = TrackerHelper.getTrackerToken(this.context)
+            anonymousId = sdkDto.anonymousId
+            distinctId = sdkDto.distinctId
 
             if (anonymousId?.isNotEmpty() == true && distinctId?.isNotEmpty() == true) {
                 val form = Gson().fromJson(eventData.toString(), JsonObject::class.java)
@@ -104,11 +107,7 @@ class ReadseeClient {
                     override fun onResponse(call: Call<SdkDto>, response: Response<SdkDto>) {
                         if (response.isSuccessful) {
                             response.body()?.let {
-                                sharedPref.edit().apply {
-                                    putString("anonymous_id", it.anonymousId)
-                                    putString("distinct_id", it.distinctId)
-                                    apply()
-                                }
+                                TrackerHelper.saveTrackerToken(this@ReadSeeApi.context, it)
                             }
                         } else {
                             Log.d("ReadseeClient", "event Request Error: ${response.errorBody()}")
@@ -122,8 +121,9 @@ class ReadseeClient {
         }
 
         private fun initProfile() {
-            anonymousId = sharedPref.getString("anonymous_id", "")
-            distinctId = sharedPref.getString("distinct_id", "")
+            val sdkDto = TrackerHelper.getTrackerToken(this.context)
+            anonymousId = sdkDto.anonymousId
+            distinctId = sdkDto.distinctId
 
             if (anonymousId.isNullOrEmpty() || distinctId.isNullOrEmpty()) {
                 val profileData = JsonObject()
@@ -138,8 +138,9 @@ class ReadseeClient {
         }
 
         override fun profile(profileData: JSONObject) {
-            anonymousId = sharedPref.getString("anonymous_id", "")
-            distinctId = sharedPref.getString("distinct_id", "")
+            val sdkDto = TrackerHelper.getTrackerToken(this.context)
+            anonymousId = sdkDto.anonymousId
+            distinctId = sdkDto.distinctId
 
             if (anonymousId?.isNotEmpty() == true && distinctId?.isNotEmpty() == true) {
                 val form = Gson().fromJson(profileData.toString(), JsonObject::class.java)
@@ -147,6 +148,9 @@ class ReadseeClient {
 
                 if (firebaseToken?.isNotEmpty() == true)
                     form.addProperty("_\$device_id", firebaseToken)
+
+                if (form.get("_\$device_id")?.asString?.isNotEmpty() == true)
+                    form.addProperty("_\$device_id", form.get("_\$device_id")?.asString)
 
                 if (form.get("_\$distinct_id")?.asString.isNullOrEmpty())
                     form.addProperty("_\$distinct_id", distinctId)
@@ -161,11 +165,7 @@ class ReadseeClient {
                     override fun onResponse(call: Call<SdkDto>, response: Response<SdkDto>) {
                         if (response.isSuccessful) {
                             response.body()?.let {
-                                sharedPref.edit().apply {
-                                    putString("anonymous_id", it.anonymousId)
-                                    putString("distinct_id", it.distinctId)
-                                    apply()
-                                }
+                                TrackerHelper.saveTrackerToken(this@ReadSeeApi.context, it)
                             }
                         } else {
                             Log.d("ReadseeClient", "profile Request Error: ${response.errorBody()}")

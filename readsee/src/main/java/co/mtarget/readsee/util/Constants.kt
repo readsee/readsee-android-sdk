@@ -14,4 +14,8 @@ internal object Constants {
     const val STORAGE_BUCKET = "prj-mt-sta-readsee-ae56b.appspot.com"
 
     const val SHARED_PREFERENCES = "readsee-client"
+
+    const val CHANNEL_ID = "readsee-push-notif-id"
+
+    const val CHANNEL_NAME = "CHANNEL NOTIFICATION"
 }

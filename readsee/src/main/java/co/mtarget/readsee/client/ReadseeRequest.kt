@@ -5,7 +5,7 @@ import co.mtarget.readsee.util.Constants
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-object ReadseeRequest {
+internal object ReadseeRequest {
     val instance : ReadseeEndpointInterface by lazy {
         Retrofit.Builder()
             .baseUrl(Constants.BASE_URL)
