@@ -13,7 +13,7 @@ import co.mtarget.readsee.util.Constants
 import com.google.firebase.messaging.RemoteMessage
 import kotlin.random.Random
 
-internal class NotificationHandler(private val context: Context) {
+class NotificationHandler(private val context: Context) {
     private val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
     fun handle(remoteMessage: RemoteMessage) {

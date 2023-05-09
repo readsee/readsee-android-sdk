@@ -5,7 +5,7 @@ import co.mtarget.readsee.client.ReadseeClient
 import co.mtarget.readsee.util.KeyStoreHelper
 import org.json.JSONObject
 
-internal class TokenHandler(private val context: Context) {
+class TokenHandler(private val context: Context) {
     fun handle(token: String) {
         val API_KEY = KeyStoreHelper.getApiKey(context)
         val data = JSONObject()
