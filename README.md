@@ -23,7 +23,7 @@ Download
 --------
 
 ```kotlin
-implementation("io.readsee.sdk:readsee-sdk:0.1.0")
+implementation("io.readsee:readsee-sdk:0.1.0")
 ```
 
 ## Getting started

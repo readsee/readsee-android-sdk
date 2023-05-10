@@ -1,8 +1,8 @@
 plugins {
     id 'com.android.library'
     id 'org.jetbrains.kotlin.android'
-    id 'maven-publish'
-
+    id 'org.jetbrains.dokka'
+    id 'com.vanniktech.maven.publish'
 }
 
 android {
@@ -48,31 +48,5 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 
-}
-
-publishing {
-    publications {
-        maven(MavenPublication) {
-            groupId 'io.readsee.sdk'
-            artifactId 'readsee-sdk'
-            version '0.1.0'
-
-            // This is the AAR file that will be published to the Maven repository.
-            artifact("$buildDir/outputs/aar/readsee-release.aar")
-
-            pom.withXml {
-                def dependenciesNode = asNode().appendNode('dependencies')
-                configurations.implementation.allDependencies.each {
-                    def dependencyNode = dependenciesNode.appendNode('dependency')
-                    dependencyNode.appendNode('groupId', it.group)
-                    dependencyNode.appendNode('artifactId', it.name)
-                    dependencyNode.appendNode('version', it.version)
-                }
-            }
-        }
-    }
-
-    repositories {
-        mavenLocal()
-    }
+    dokkaPlugin 'org.jetbrains.dokka:android-documentation-plugin:1.8.10'
 }
