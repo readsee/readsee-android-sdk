@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace 'co.mtarget.readsee'
+    namespace 'io.readsee.sdk'
     compileSdk 33
 
     defaultConfig {

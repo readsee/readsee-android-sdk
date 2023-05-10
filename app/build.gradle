@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace 'co.mtarget.readsee'
+    namespace 'io.readsee.sdk'
     compileSdk 33
 
     defaultConfig {
-        applicationId "co.mtarget.readsee"
+        applicationId "io.readsee.sdk"
         minSdk 21
         targetSdk 33
         versionCode 1
