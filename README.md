@@ -26,7 +26,7 @@ Download
 implementation("io.readsee.sdk:readsee-sdk:0.1.0")
 ```
 
-## Quick Start
+## Getting started
 
 ```kotlin
   // Init client & setup readsee api
