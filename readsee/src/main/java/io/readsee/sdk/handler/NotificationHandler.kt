@@ -19,7 +19,7 @@ class NotificationHandler(private val context: Context) {
     fun handle(remoteMessage: RemoteMessage) {
         val title = remoteMessage.notification?.title ?: "Notification Title"
         val message = remoteMessage.notification?.body ?: "Notification Message"
-        val iconResId = R.drawable.ic_stat_ic_notification // Or any other icon resource ID
+        val iconResId = R.drawable.ic_notifications_24 // Or any other icon resource ID
         val url = remoteMessage.data["actionUrl"] ?: ""
 
         // Since android Oreo notification channel is needed.
@@ -32,24 +32,27 @@ class NotificationHandler(private val context: Context) {
             notificationManager.createNotificationChannel(channel)
         }
 
-        // Create the intent to open the web page
-        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-
-        // Create a pending intent to launch the intent when the notification is clicked
-        val pendingIntent = PendingIntent.getActivity(
-            context,
-            0,
-            intent,
-            PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE
-        )
-
         // Build the notification
         val notification = NotificationCompat.Builder(context, Constants.CHANNEL_ID)
             .setSmallIcon(iconResId)
             .setContentTitle(title)
             .setContentText(message)
-            .setContentIntent(pendingIntent)
             .setAutoCancel(true)
+
+        if (url.isNotEmpty()) {
+            // Create the intent to open the web page
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+
+            // Create a pending intent to launch the intent when the notification is clicked
+            val pendingIntent = PendingIntent.getActivity(
+                context,
+                0,
+                intent,
+                PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE
+            )
+
+            notification.setContentIntent(pendingIntent)
+        }
 
         val notificationId = Random.nextInt()
 
