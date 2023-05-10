@@ -6,7 +6,9 @@ interface ReadseeAPIInterface {
 
     fun ping()
 
-    fun event(eventData: JSONObject)
+    fun event(eventName: String, eventData: JSONObject)
 
     fun profile(profileData: JSONObject)
+
+    fun logout()
 }

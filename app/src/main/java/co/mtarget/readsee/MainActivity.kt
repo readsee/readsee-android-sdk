@@ -54,11 +54,10 @@ class MainActivity : AppCompatActivity() {
 
     fun trackEvent() {
         val data = JSONObject()
-        data.put("_\$name", "androidsdkevent")
         data.put("_\$city", "Semarang")
         data.put("_\$country", "Indonesia")
         Log.d("MainActivity", "On Click btn Tracker ${data}")
-        tracker.event(data)
+        tracker.event("androidsdkevent", data)
     }
 
     fun updateProfile() {

@@ -87,7 +87,7 @@ class ReadseeClient {
                 })
         }
 
-        override fun event(eventData: JSONObject) {
+        override fun event(eventName: String, eventData: JSONObject) {
             val sdkDto = TrackerHelper.getTrackerToken(this.context)
             anonymousId = sdkDto.anonymousId
             distinctId = sdkDto.distinctId
@@ -96,6 +96,7 @@ class ReadseeClient {
                 val form = Gson().fromJson(eventData.toString(), JsonObject::class.java)
                 form.addProperty("_\$anonymous_id", anonymousId)
                 form.addProperty("_\$distinct_id", distinctId)
+                form.addProperty("_\$name", eventName)
 
                 sendEvent(form)
             }
@@ -176,6 +177,10 @@ class ReadseeClient {
                         Log.d("ReadseeClient", "profile Network Error: ${t.localizedMessage}")
                     }
                 })
+        }
+
+        override fun logout() {
+            TrackerHelper.saveTrackerToken(this.context, SdkDto("", ""))
         }
     }
 }
