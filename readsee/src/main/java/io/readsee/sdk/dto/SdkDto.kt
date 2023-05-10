@@ -1,4 +1,4 @@
-package co.mtarget.readsee.dto
+package io.readsee.sdk.dto
 
 import com.google.gson.annotations.SerializedName
 import java.util.*

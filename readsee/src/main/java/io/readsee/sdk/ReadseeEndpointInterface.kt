@@ -1,6 +1,6 @@
-package co.mtarget.readsee
+package io.readsee.sdk
 
-import co.mtarget.readsee.dto.SdkDto
+import io.readsee.sdk.dto.SdkDto
 import com.google.gson.JsonObject
 import retrofit2.Call
 import retrofit2.http.Body

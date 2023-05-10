@@ -30,7 +30,7 @@
                 android:value="" />
         </activity>
         <service
-            android:name="co.mtarget.readsee.client.ReadseeFirebaseMessagingService"
+            android:name="io.readsee.sdk.client.ReadseeFirebaseMessagingService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />

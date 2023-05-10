@@ -1,8 +1,8 @@
-package co.mtarget.readsee.handler
+package io.readsee.sdk.handler
 
 import android.content.Context
-import co.mtarget.readsee.client.ReadseeClient
-import co.mtarget.readsee.util.KeyStoreHelper
+import io.readsee.sdk.client.ReadseeClient
+import io.readsee.sdk.util.KeyStoreHelper
 import org.json.JSONObject
 
 class TokenHandler(private val context: Context) {

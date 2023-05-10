@@ -1,7 +1,7 @@
-package co.mtarget.readsee.client
+package io.readsee.sdk.client
 
-import co.mtarget.readsee.ReadseeEndpointInterface
-import co.mtarget.readsee.util.Constants
+import io.readsee.sdk.ReadseeEndpointInterface
+import io.readsee.sdk.util.Constants
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 

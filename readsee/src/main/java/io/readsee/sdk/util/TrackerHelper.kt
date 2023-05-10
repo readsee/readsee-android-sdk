@@ -1,7 +1,7 @@
-package co.mtarget.readsee.util
+package io.readsee.sdk.util
 
 import android.content.Context
-import co.mtarget.readsee.dto.SdkDto
+import io.readsee.sdk.dto.SdkDto
 
 internal object TrackerHelper {
     fun saveTrackerToken(context: Context, sdkDto: SdkDto) {

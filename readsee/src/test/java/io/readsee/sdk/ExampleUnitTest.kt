@@ -1,7 +1,7 @@
-package co.mtarget.readsee
+package io.readsee.sdk
 
 import android.app.Activity
-import co.mtarget.readsee.client.ReadseeClient
+import io.readsee.sdk.client.ReadseeClient
 import org.junit.Test
 
 /**

@@ -1,4 +1,4 @@
-package co.mtarget.readsee.util
+package io.readsee.sdk.util
 
 internal object Constants {
     const val BASE_URL = "https://apista.readsee.io/v1/"

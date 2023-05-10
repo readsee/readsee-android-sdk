@@ -1,13 +1,13 @@
-package co.mtarget.readsee.client
+package io.readsee.sdk.client
 
 import android.content.Context
 import android.util.Log
-import co.mtarget.readsee.ReadseeAPIInterface
-import co.mtarget.readsee.ReadseeEndpointInterface
-import co.mtarget.readsee.dto.SdkDto
-import co.mtarget.readsee.util.Constants
-import co.mtarget.readsee.util.KeyStoreHelper
-import co.mtarget.readsee.util.TrackerHelper
+import io.readsee.sdk.ReadseeAPIInterface
+import io.readsee.sdk.ReadseeEndpointInterface
+import io.readsee.sdk.dto.SdkDto
+import io.readsee.sdk.util.Constants
+import io.readsee.sdk.util.KeyStoreHelper
+import io.readsee.sdk.util.TrackerHelper
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.FirebaseApp
 import com.google.firebase.FirebaseOptions

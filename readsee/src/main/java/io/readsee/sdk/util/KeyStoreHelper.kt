@@ -1,4 +1,4 @@
-package co.mtarget.readsee.util
+package io.readsee.sdk.util
 
 import android.content.Context
 

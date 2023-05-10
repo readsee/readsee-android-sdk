@@ -1,4 +1,4 @@
-package co.mtarget.readsee
+package io.readsee.sdk
 
 import android.Manifest.permission.POST_NOTIFICATIONS
 import android.content.pm.PackageManager
@@ -8,8 +8,8 @@ import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import co.mtarget.readsee.client.ReadseeClient
-import co.mtarget.readsee.databinding.ActivityMainBinding
+import io.readsee.sdk.client.ReadseeClient
+import io.readsee.sdk.databinding.ActivityMainBinding
 import org.json.JSONObject
 
 class MainActivity : AppCompatActivity() {

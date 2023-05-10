@@ -1,7 +1,7 @@
-package co.mtarget.readsee.client
+package io.readsee.sdk.client
 
-import co.mtarget.readsee.handler.NotificationHandler
-import co.mtarget.readsee.handler.TokenHandler
+import io.readsee.sdk.handler.NotificationHandler
+import io.readsee.sdk.handler.TokenHandler
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 

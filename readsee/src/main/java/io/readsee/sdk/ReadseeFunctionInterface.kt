@@ -1,4 +1,4 @@
-package co.mtarget.readsee
+package io.readsee.sdk
 
 import org.json.JSONObject
 

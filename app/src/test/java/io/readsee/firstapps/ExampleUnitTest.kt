@@ -1,4 +1,4 @@
-package co.mtarget.firstapps
+package io.readsee.firstapps
 
 import org.junit.Test
 
